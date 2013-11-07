@@ -71,7 +71,7 @@ The following is a description of the OC grammar:
 """
 
 from pyparsing import *
-from parser_old import *
+from file_processor import *
 
 # brace definition
 LPAR,RPAR,LBRACK,RBRACK,LBRACE,RBRACE,SEMI,COMMA = map(Suppress, "()[]{};,")
@@ -86,6 +86,7 @@ FLOAT = Keyword("float")
 DOUBLE = Keyword("double")
 SIGNED = Keyword("signed")
 UNSIGNED = Keyword("unsigned")
+CUSTOM_TYPE = Word(alphas+"_", alphanums+"_")
 
 #STORAGE_CLASS_SPEC keywords definition
 AUTO = Keyword("auto")
@@ -110,11 +111,11 @@ integer = Regex(r"[+-]?\d+")
 char = Regex(r"'.'")
 string_ = dblQuotedString
 
-TYPE = Group((VOID | INT | CHAR | SHORT | LONG | FLOAT | DOUBLE | SIGNED | UNSIGNED) + ZeroOrMore("*"))
+TYPE = Group((VOID | INT | CHAR | SHORT | LONG | FLOAT | DOUBLE | SIGNED | UNSIGNED ) + ZeroOrMore("*"))
 
 STORAGE_CLASS_SPEC = Group(( AUTO | REGISTER | STATIC | EXTERN | TYPEDEF ) + ZeroOrMore("*"))
 
-STRUCT_OR_UNION = Group(( STRUCT | UNION ) + ZeroOrMore("*"))
+STRUCT_OR_UNION = Group(( STRUCT | UNION ) + CUSTOM_TYPE + ZeroOrMore("*"))
 
 expr = Forward()
 operand = NAME | integer | char | string_
@@ -125,7 +126,7 @@ expr << (operatorPrecedence(operand,
     (oneOf('++ --'), 1, opAssoc.LEFT),
     (oneOf('* / %'), 2, opAssoc.LEFT),
     (oneOf('+ -'), 2, opAssoc.LEFT),
-    (oneOf('< == > <= >= !='), 2, opAssoc.LEFT),
+    (oneOf('< == > <= >= != ->'), 2, opAssoc.LEFT),
     (Regex(r'=[^=]'), 2, opAssoc.LEFT),
     ]) + 
     Optional( LBRACK + expr + RBRACK | 
@@ -224,7 +225,7 @@ int a(int x){}
 #import pprint
 #pprint.pprint(ast.asList())
 
-#program = ZeroOrMore(fundecl)
+program = ZeroOrMore(ifstmt)
 src_text = file_reader('sem.c')
 #print src_text
 ast = program.parseString(src_text, parseAll=True)
