@@ -2,7 +2,6 @@
 #
 #   A subset-C parser, (Partial BNF taken from 1996 International Obfuscated C Code Contest)
 #
-#   Copyright, 2013, Jiang Mengtao
 #
 """
 http://www.ioccc.org/1996/august.hint
